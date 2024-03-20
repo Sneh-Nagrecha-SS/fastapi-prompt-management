@@ -5,12 +5,12 @@ from fastapi.exceptions import RequestValidationError
 from app.web.router import api_router
 from app.web import monitor
 from app.middleware import profiler
-from app.helper.language_helper import language_translator
 from app.helper.response_helper import BaseResponse
 from app.lifetime import register_startup_event, register_shutdown_event
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import logging.config
+from fastapi_pagination import add_pagination
 
 APP_ROOT = Path(__file__).parent.parent
 logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
@@ -40,7 +40,7 @@ def get_app() -> FastAPI:
         request: Request, exc: RequestValidationError
     ):
         return await BaseResponse.request_exception_response(
-            language_translator(request), exc
+            request, exc
         )
 
     # Adds startup and shutdown events.
@@ -53,6 +53,7 @@ def get_app() -> FastAPI:
     # Main router for the API.
     app.include_router(router=api_router, prefix="/api")
     app.include_router(router=monitor.router)
+    add_pagination(app)
 
     # Adds static directory.
     # This directory is used to access swagger files.

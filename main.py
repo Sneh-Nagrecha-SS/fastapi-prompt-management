@@ -1,4 +1,6 @@
 import uvicorn
+
+from app.services.db.initialise_db import initialize_db
 from app.settings import settings
 
 
@@ -13,6 +15,9 @@ def main() -> None:
         log_level=settings.log_level.value.lower(),
         factory=True,
     )
+
+    initialize_db()
+
 
 
 if __name__ == "__main__":

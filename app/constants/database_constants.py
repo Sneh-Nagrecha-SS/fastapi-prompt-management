@@ -1,2 +1,2 @@
-USER_DB = "user_db"
+USER_DB = "promptManagement"
 USER_COLLECTIONS = "users"

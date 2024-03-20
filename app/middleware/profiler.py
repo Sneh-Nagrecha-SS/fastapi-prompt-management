@@ -6,7 +6,6 @@ from app.helper.response_helper import BaseResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 import time
 import uuid
-from app.helper.language_helper import language_translator
 
 
 class ProfilerMiddleware(BaseHTTPMiddleware):
@@ -21,7 +20,6 @@ class ProfilerMiddleware(BaseHTTPMiddleware):
          2. logs processing time
          3. handle server side exception globally.
         """
-        translator = language_translator(request)
         request_id = str(uuid.uuid4())
         start_time = time.time()
         try:
@@ -43,7 +41,7 @@ class ProfilerMiddleware(BaseHTTPMiddleware):
             return response
 
         except CustomException as ce:
-            resp = await BaseResponse.custom_exception_response(translator, ce.name)
+            resp = await BaseResponse.custom_exception_response(ce.name)
             return resp
         except Exception as e:
             if settings.environment == "dev":
@@ -54,4 +52,4 @@ class ProfilerMiddleware(BaseHTTPMiddleware):
                 f"RequestID: {request_id} -> Path {request.url.path}"
                 f" Error: {str(e)}"
             )
-            return await BaseResponse.server_error_response(translator)
+            return await BaseResponse.server_error_response()

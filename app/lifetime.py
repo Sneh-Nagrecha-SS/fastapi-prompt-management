@@ -2,9 +2,7 @@ from typing import Awaitable, Callable
 from fastapi import FastAPI
 
 from app.settings import settings
-from app.services.redis.lifetime import init_redis, shutdown_redis
-from app.services.es.lifetime import init_es, shutdown_es
-from app.services.mongo.lifetime import init_mongo, shutdown_mongo
+
 from asyncio import current_task
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -55,9 +53,7 @@ def register_startup_event(
     @app.on_event("startup")
     async def _startup() -> None:  # noqa: WPS430
         _setup_db(app)
-        init_redis(app)
-        init_es(app)
-        init_mongo(app)
+
         # noqa: WPS420
 
     return _startup
@@ -76,9 +72,7 @@ def register_shutdown_event(
     @app.on_event("shutdown")
     async def _shutdown() -> None:  # noqa: WPS430
         await app.state.db_engine.dispose()
-        await shutdown_es(app)
-        await shutdown_redis(app)
-        await shutdown_mongo(app)
+
         # noqa: WPS420
 
     return _shutdown

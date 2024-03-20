@@ -28,11 +28,11 @@ class Settings(BaseSettings):
     """
 
     host: str = "127.0.0.1"
-    port: int = 8000
+    port: int = 8080
     # quantity of workers for uvicorn
     workers_count: int = 1
     # Enable uvicorn reloading
-    reload: bool = False
+    reload: bool = True
 
     # Current environment
     environment: str = "dev"
@@ -41,32 +41,11 @@ class Settings(BaseSettings):
 
     # Variables for the database
     db_host: str = "localhost"
-    db_port: int = 3306
-    db_user: str = "demo_app"
-    db_pass: str = "demo_app"
-    db_base: str = "demo_app"
+    db_port: int = 3307
+    db_user: str = "root"
+    db_pass: str = "root"
+    db_base: str = "mysql"
     db_echo: bool = False
-
-    # Variables for Redis
-    redis_host: str = "demo_app-redis"
-    redis_port: int = 6379
-    redis_user: Optional[str] = None
-    redis_pass: Optional[str] = None
-    redis_base: Optional[int] = None
-
-    # Variables for ElasticSearch
-    es_host_url: str = ""
-    es_user: str = ""
-    es_pass: str = ""
-    es_user_index: str = ""
-
-    mongo_host: str = ""
-    mongo_port: int
-    mongo_user: str = ""
-    mongo_pass: str = ""
-
-    localization_dir: str = "locales"
-    localization_domain: str = "base"
 
     @property
     def db_url(self) -> URL:
@@ -82,39 +61,6 @@ class Settings(BaseSettings):
             user=self.db_user,
             password=self.db_pass,
             path=f"/{self.db_base}",
-        )
-
-    @property
-    def redis_url(self) -> URL:
-        """
-        Assemble REDIS URL from settings.
-
-        :return: redis URL.
-        """
-        path = ""
-        if self.redis_base is not None:
-            path = f"/{self.redis_base}"
-        return URL.build(
-            scheme="redis",
-            host=self.redis_host,
-            port=self.redis_port,
-            user=self.redis_user,
-            password=self.redis_pass,
-            path=path,
-        )
-
-    @property
-    def mongo_url(self) -> URL:
-        """
-        Assemble Mongo URL from settings.
-        :return: mongo URL
-        """
-        return URL.build(
-            scheme="mongodb",
-            host=self.mongo_host,
-            port=self.mongo_port,
-            user=self.mongo_user,
-            password=self.mongo_pass,
         )
 
     class Config:
