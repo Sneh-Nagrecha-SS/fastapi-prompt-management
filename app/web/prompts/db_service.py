@@ -22,6 +22,14 @@ class Prompt(DBService):
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
+    async def prompt_exists_by_id(self, prompt_id):
+        select_query = select(PromptMaster).where(PromptMaster.id == prompt_id)
+        existing_prompt_result = await self.db_session.execute(select_query)
+        existing_prompt = existing_prompt_result.scalars().first()
+        if existing_prompt:
+            return existing_prompt
+        return False
+
     async def get_rating_details(self, prompt_id) -> Dict:
         rating_query = select(func.round(func.avg(Ratings.rating, ), 1), func.count(Ratings.rating)).group_by(
             Ratings.prompt_id).where(Ratings.prompt_id == prompt_id)
@@ -45,7 +53,7 @@ class Prompt(DBService):
         rating_dict = ratings.__dict__
         return rating_dict
 
-    async def prompt_exists(self, title)->bool:
+    async def prompt_title_exists(self, title) -> bool:
         select_query = select(PromptMaster).where(PromptMaster.title == title)
         existing_prompt_result = await self.db_session.execute(select_query)
         existing_prompt = list(existing_prompt_result.scalars())
@@ -61,11 +69,8 @@ class Prompt(DBService):
         :param kwargs:
         :return Dict:
         """
-        # select_query = select(PromptMaster).where(PromptMaster.title == data.title)
-        # existing_prompt_result = await self.db_session.execute(select_query)
-        # existing_prompt = list(existing_prompt_result.scalars())
 
-        if await self.prompt_exists(data.title):
+        if await self.prompt_title_exists(data.title):
             raise CustomException(message=constants.PROMPT_ALREADY_EXISTS)
 
         promptMaster = PromptMaster()
@@ -120,17 +125,18 @@ class Prompt(DBService):
         :param kwargs:
         :return:
         """
-        select_query = select(PromptMaster).where(PromptMaster.id == prompt_id)
-        existing_prompt_result = await self.db_session.execute(select_query)
-        existing_prompt = existing_prompt_result.scalars().first()
+
+        existing_prompt = await self.prompt_exists_by_id(prompt_id)
 
         if not existing_prompt:
             raise CustomException(message=constants.PROMPT_NOT_DEFINED)
 
         update_values = {}
 
-        if data.title is not None and existing_prompt.title != data.title:
-            if existing_prompt.title != data.title and await self.prompt_exists(data.title):
+        # Check if Title is provided
+        if data.title is not None:
+            # If title is provided check if it is not the same as earlier and there is no same title already
+            if data.title != existing_prompt.title and await self.prompt_title_exists(data.title):
                     raise CustomException(message=constants.PROMPT_ALREADY_EXISTS)
             update_values["title"] = data.title
 
