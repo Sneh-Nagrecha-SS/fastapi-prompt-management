@@ -1,6 +1,9 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 #USER Sneh
+
+# # Use Google DNS
+# RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
 LABEL org.opencontainers.image.authors="sneh.nagrecha@smartsensesolutions.com"
 LABEL version="1.0"

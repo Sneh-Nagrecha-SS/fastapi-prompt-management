@@ -14,20 +14,16 @@ from app.web.prompts.response import PromptResponse
 from app.web.prompts.schema import PromptMaster
 from app.web.prompts.service import Prompt as PromptService
 from fastapi_pagination import paginate, add_pagination
-
+from fastapi_utils.cbv import cbv
 from app.web.prompts.validator import PromptUpdate, PromptSearch, Prompt
-
-
-
-
 
 router = InferringRouter()
 
 @cbv(router)
 class Prompt:
 
-    @router.get('/')
-    async def get_prompt(prompt_id: str, db=Depends(get_db_session)) -> PromptResponse:
+    @router.get("/")
+    async def get_prompt(self, prompt_id: str, db=Depends(get_db_session)) -> PromptResponse:
         prompt_service = PromptService(db)
         response = await prompt_service.get(prompt_id)
         return PromptResponse(
@@ -36,9 +32,8 @@ class Prompt:
             status=status.HTTP_200_OK
         )
 
-
-    @router.post('/')
-    async def add_prompt(prompt_data: Prompt, db=Depends(get_db_session)) -> PromptResponse:
+    @router.post("/")
+    async def add_prompt(self, prompt_data: Prompt, db=Depends(get_db_session)) -> PromptResponse:
         prompt_service = PromptService(db)
         response = await prompt_service.create(prompt_data)
 
@@ -53,9 +48,8 @@ class Prompt:
             status=status.HTTP_200_OK
         )
 
-
-    @router.delete('/')
-    async def delete_prompt(prompt_id: str, db=Depends(get_db_session)) -> PromptResponse:
+    @router.delete("/")
+    async def delete_prompt(self, prompt_id: str, db=Depends(get_db_session)) -> PromptResponse:
         prompt_service = PromptService(db)
         response = await prompt_service.delete(prompt_id)
 
@@ -64,9 +58,8 @@ class Prompt:
             status=status.HTTP_200_OK
         )
 
-
-    @router.put('/')
-    async def update_prompt(prompt_id: str, prompt: PromptUpdate, db=Depends(get_db_session)):
+    @router.put("/")
+    async def update_prompt(self, prompt_id: str, prompt: PromptUpdate, db=Depends(get_db_session)):
         prompt_service = PromptService(db)
         response = await prompt_service.update(prompt_id, prompt)
         print(response)
@@ -76,10 +69,11 @@ class Prompt:
             status=status.HTTP_200_OK
         )
 
-    @router.post('/list')
-    async def get_list_of_prompts(searchParameters: PromptSearch, db=Depends(get_db_session)):
+    @router.post("/list")
+    async def get_list_of_prompts(self, searchParameters: PromptSearch, db=Depends(get_db_session)):
         prompt_service = PromptService(db)
         total_records, response = await prompt_service.get_list(searchParameters)
 
-        pagination_data = dict([("total_records", total_records), ("page_number", searchParameters.page_number), ("records_per_page", searchParameters.records_per_page)])
+        pagination_data = dict([("total_records", total_records), ("page_number", searchParameters.page_number),
+                                ("records_per_page", searchParameters.records_per_page)])
         return response, pagination_data
